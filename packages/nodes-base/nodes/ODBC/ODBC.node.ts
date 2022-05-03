@@ -169,41 +169,43 @@ export class ODBC implements INodeType {
 
 	// @ts-ignore
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const driver = this.getNodeParameter('driver', 0) as string;
-		const host = this.getNodeParameter('host', 0) as string;
-		const user = this.getNodeParameter('user', 0) as string;
-		const password = this.getNodeParameter('password', 0) as string;
-		const queryStr = this.getNodeParameter('queryStr', 0) as string;
-		const port = this.getNodeParameter('port', 0) as string;
-		const databaseName = this.getNodeParameter('databaseName', 0) as string;
 		const odbcType = this.getNodeParameter('odbcType', 0) as string;
-		const connectionStringCustom = this.getNodeParameter('csCustom', 0) as string;
+		const queryStr = this.getNodeParameter('queryStr', 0) as string;
 
 		const odbc = require('odbc');
 		let connectionString = '';
 		if(odbcType === 'Custom'){
+			const connectionStringCustom = this.getNodeParameter('csCustom', 0) as string;
 			connectionString = connectionStringCustom;
 		}
-		else if(odbcType === 'PostgreSQL') {
-			connectionString = 'Driver={' + driver + '};Server=' + host;
-			if (port != null) {
-				connectionString += ';Port=' + port;
+		else{
+			const driver = this.getNodeParameter('driver', 0) as string;
+			const host = this.getNodeParameter('host', 0) as string;
+			const user = this.getNodeParameter('user', 0) as string;
+			const password = this.getNodeParameter('password', 0) as string;
+			const port = this.getNodeParameter('port', 0) as string;
+			const databaseName = this.getNodeParameter('databaseName', 0) as string;
+			if(odbcType === 'PostgreSQL') {
+				connectionString = 'Driver={' + driver + '};Server=' + host;
+				if (port != null) {
+					connectionString += ';Port=' + port;
+				}
+				connectionString += ';Database=' + databaseName + '; Uid=' + user + '; Pwd=' + password;
 			}
-			connectionString += ';Database=' + databaseName + '; Uid=' + user + '; Pwd=' + password;
-		}
-		else if(odbcType === 'SQL Server') {
-			connectionString = 'Driver={' + driver + '};Server=' + host;
-			if (port != null) {
-				connectionString += ',' + port;
+			else if(odbcType === 'SQL Server') {
+				connectionString = 'Driver={' + driver + '};Server=' + host;
+				if (port != null) {
+					connectionString += ',' + port;
+				}
+				connectionString += ';Database=' + databaseName + '; Uid=' + user + '; Pwd=' + password+';TrustServerCertificate=yes;';
 			}
-			connectionString += ';Database=' + databaseName + '; Uid=' + user + '; Pwd=' + password+';TrustServerCertificate=yes;';
-		}
-		else if(odbcType === 'HFSQL') {
-			connectionString = 'DRIVER={' + driver + '};Server Name=' + host;
-			if (port != null) {
-				connectionString += ';Server Port=' + port;
+			else if(odbcType === 'HFSQL') {
+				connectionString = 'DRIVER={' + driver + '};Server Name=' + host;
+				if (port != null) {
+					connectionString += ';Server Port=' + port;
+				}
+				connectionString += ';Database=' + databaseName + '; UID=' + user + '; PWD=' + password+';';
 			}
-			connectionString += ';Database=' + databaseName + '; UID=' + user + '; PWD=' + password+';';
 		}
 		const pool = await odbc.pool(connectionString);
 
