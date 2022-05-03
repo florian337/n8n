@@ -3,6 +3,7 @@ import {
 } from 'n8n-core';
 
 import {
+	IDataObject,
 	INodeExecutionData,
 	INodeType,
 	INodeTypeDescription,
@@ -33,6 +34,24 @@ export class ODBC implements INodeType {
 				required: true,
 				default:'',
 				description:'Driver of the database',
+			},
+			{
+				displayName: 'ODBC Type',
+				name: 'odbcType',
+				type: 'options',
+				options: [
+					{
+						name: 'PostgreSQL',
+						value: 'PostgreSQL',
+					},
+					{
+						name: 'SQL Server',
+						value: 'SQL Server',
+					},
+				],
+				default: 'SQL Server',
+				required: true,
+				description: 'The ODBC to use',
 			},
 			{
 				displayName: 'Host',
@@ -80,7 +99,7 @@ export class ODBC implements INodeType {
 				options: [
 					{
 						name: 'Execute Query',
-						value: 'Insert',
+						value: 'Execute Query',
 					},
 				],
 				default: 'Execute Query',
@@ -107,20 +126,30 @@ export class ODBC implements INodeType {
 		const queryStr = this.getNodeParameter('queryStr', 0) as string;
 		const port = this.getNodeParameter('port', 0) as string;
 		const databaseName = this.getNodeParameter('databaseName', 0) as string;
+		const odbcType = this.getNodeParameter('odbcType', 0) as string;
 
 		const odbc = require('odbc');
-		let connectionString = 'Driver={' + driver+ '};Server=' + host;
-		if(port != null) {
-			connectionString += ';Port='+port;
+		let connectionString = '';
+		if(odbcType === 'PostgreSQL') {
+			connectionString = 'Driver={' + driver + '};Server=' + host;
+			if (port != null) {
+				connectionString += ';Port=' + port;
+			}
+			connectionString += ';Database=' + databaseName + '; Uid=' + user + '; Pwd=' + password;
 		}
-		connectionString += ';Database=' + databaseName +'; Uid='+user+'; Pwd='+password ;
+		else if(odbcType === 'SQL Server') {
+			connectionString = 'Driver={' + driver + '};Server=' + host;
+			if (port != null) {
+				connectionString += ',' + port;
+			}
+			connectionString += ';Database=' + databaseName + '; Uid=' + user + '; Pwd=' + password+';TrustServerCertificate=yes;';
+		}
 		const pool = await odbc.pool(connectionString);
 
 		if (queryType === 'Execute Query') {
 			const query = queryStr;
-			const returnData = [];
 			const result = await pool.query(query);
-			returnData.push(result);
+			const returnData: IDataObject = result;
 			return [this.helpers.returnJsonArray(returnData)];
 		}
 	}
