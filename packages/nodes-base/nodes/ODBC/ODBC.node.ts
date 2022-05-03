@@ -31,7 +31,7 @@ export class ODBC implements INodeType {
 				displayName: 'Driver',
 				name: 'driver',
 				type: 'string',
-				required: true,
+				required: false,
 				default:'',
 				description:'Driver of the database',
 			},
@@ -40,6 +40,10 @@ export class ODBC implements INodeType {
 				name: 'odbcType',
 				type: 'options',
 				options: [
+					{
+						name: 'Custom',
+						value: 'Custom',
+					},
 					{
 						name: 'PostgreSQL',
 						value: 'PostgreSQL',
@@ -58,10 +62,18 @@ export class ODBC implements INodeType {
 				description: 'The ODBC to use',
 			},
 			{
+				displayName: 'Custom Connection String',
+				name: 'csCustom',
+				type: 'string',
+				required: false,
+				default:'',
+				description:'If your ODBC is not in the list, you can write your own connectionString',
+			},
+			{
 				displayName: 'Host',
 				name: 'host',
 				type: 'string',
-				required: true,
+				required: false,
 				default:'',
 				description:'Host of the database',
 			},
@@ -84,7 +96,7 @@ export class ODBC implements INodeType {
 				displayName: 'User',
 				name: 'user',
 				type: 'string',
-				required: true,
+				required: false,
 				default:'',
 				description:'User for the database',
 			},
@@ -92,7 +104,7 @@ export class ODBC implements INodeType {
 				displayName: 'Password',
 				name: 'password',
 				type: 'string',
-				required: true,
+				required: false,
 				default:'',
 				description:'Password of the database',
 			},
@@ -116,10 +128,14 @@ export class ODBC implements INodeType {
 		const port = this.getNodeParameter('port', 0) as string;
 		const databaseName = this.getNodeParameter('databaseName', 0) as string;
 		const odbcType = this.getNodeParameter('odbcType', 0) as string;
+		const connectionStringCustom = this.getNodeParameter('csCustom', 0) as string;
 
 		const odbc = require('odbc');
 		let connectionString = '';
-		if(odbcType === 'PostgreSQL') {
+		if(odbcType === 'Custom'){
+			connectionString = connectionStringCustom;
+		}
+		else if(odbcType === 'PostgreSQL') {
 			connectionString = 'Driver={' + driver + '};Server=' + host;
 			if (port != null) {
 				connectionString += ';Port=' + port;
