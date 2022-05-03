@@ -28,14 +28,6 @@ export class ODBC implements INodeType {
 		],
 		properties: [
 			{
-				displayName: 'Driver',
-				name: 'driver',
-				type: 'string',
-				required: false,
-				default:'',
-				description:'Driver of the database',
-			},
-			{
 				displayName: 'ODBC Type',
 				name: 'odbcType',
 				type: 'options',
@@ -62,12 +54,34 @@ export class ODBC implements INodeType {
 				description: 'The ODBC to use',
 			},
 			{
+				displayName: 'Driver',
+				name: 'driver',
+				type: 'string',
+				required: false,
+				default:'',
+				description:'Driver of the database',
+				displayOptions: {
+					hide: {
+						odbcType: [
+							'Custom',
+						],
+					},
+				},
+			},
+			{
 				displayName: 'Custom Connection String',
 				name: 'csCustom',
 				type: 'string',
 				required: false,
 				default:'',
 				description:'If your ODBC is not in the list, you can write your own connectionString',
+				displayOptions: {
+					show: {
+						odbcType: [
+							'Custom',
+						],
+					},
+				},
 			},
 			{
 				displayName: 'Host',
@@ -76,6 +90,13 @@ export class ODBC implements INodeType {
 				required: false,
 				default:'',
 				description:'Host of the database',
+				displayOptions: {
+					hide: {
+						odbcType: [
+							'Custom',
+						],
+					},
+				},
 			},
 			{
 				displayName: 'Port',
@@ -84,6 +105,13 @@ export class ODBC implements INodeType {
 				default:'',
 				required: false,
 				description: 'Query to execute',
+				displayOptions: {
+					hide: {
+						odbcType: [
+							'Custom',
+						],
+					},
+				},
 			},
 			{
 				displayName: 'Database name',
@@ -91,6 +119,13 @@ export class ODBC implements INodeType {
 				type: 'string',
 				default: '',
 				required: true,
+				displayOptions: {
+					hide: {
+						odbcType: [
+							'Custom',
+						],
+					},
+				},
 			},
 			{
 				displayName: 'User',
@@ -99,6 +134,13 @@ export class ODBC implements INodeType {
 				required: false,
 				default:'',
 				description:'User for the database',
+				displayOptions: {
+					hide: {
+						odbcType: [
+							'Custom',
+						],
+					},
+				},
 			},
 			{
 				displayName: 'Password',
@@ -107,6 +149,13 @@ export class ODBC implements INodeType {
 				required: false,
 				default:'',
 				description:'Password of the database',
+				displayOptions: {
+					hide: {
+						odbcType: [
+							'Custom',
+						],
+					},
+				},
 			},
 			{
 				displayName: 'Query',
