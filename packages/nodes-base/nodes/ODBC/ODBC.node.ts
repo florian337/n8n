@@ -48,8 +48,12 @@ export class ODBC implements INodeType {
 						name: 'SQL Server',
 						value: 'SQL Server',
 					},
+					{
+						name: 'HFSQL',
+						value: 'HFSQL',
+					},
 				],
-				default: 'SQL Server',
+				default: 'PostgreSQL',
 				required: true,
 				description: 'The ODBC to use',
 			},
@@ -93,20 +97,6 @@ export class ODBC implements INodeType {
 				description:'Password of the database',
 			},
 			{
-				displayName: 'Query Type',
-				name: 'query',
-				type: 'options',
-				options: [
-					{
-						name: 'Execute Query',
-						value: 'Execute Query',
-					},
-				],
-				default: 'Execute Query',
-				required: true,
-				description: 'Query to execute',
-			},
-			{
 				displayName: 'Query',
 				name: 'queryStr',
 				type: 'string',
@@ -122,7 +112,6 @@ export class ODBC implements INodeType {
 		const host = this.getNodeParameter('host', 0) as string;
 		const user = this.getNodeParameter('user', 0) as string;
 		const password = this.getNodeParameter('password', 0) as string;
-		const queryType = this.getNodeParameter('query', 0) as string;
 		const queryStr = this.getNodeParameter('queryStr', 0) as string;
 		const port = this.getNodeParameter('port', 0) as string;
 		const databaseName = this.getNodeParameter('databaseName', 0) as string;
@@ -144,13 +133,18 @@ export class ODBC implements INodeType {
 			}
 			connectionString += ';Database=' + databaseName + '; Uid=' + user + '; Pwd=' + password+';TrustServerCertificate=yes;';
 		}
+		else if(odbcType === 'HFSQL') {
+			connectionString = 'DRIVER={' + driver + '};Server Name=' + host;
+			if (port != null) {
+				connectionString += ';Server Port=' + port;
+			}
+			connectionString += ';Database=' + databaseName + '; UID=' + user + '; PWD=' + password+';';
+		}
 		const pool = await odbc.pool(connectionString);
 
-		if (queryType === 'Execute Query') {
-			const query = queryStr;
-			const result = await pool.query(query);
-			const returnData: IDataObject = result;
-			return [this.helpers.returnJsonArray(returnData)];
-		}
+		const query = queryStr;
+		const result = await pool.query(query);
+		const returnData: IDataObject = result;
+		return [this.helpers.returnJsonArray(returnData)];
 	}
 }
